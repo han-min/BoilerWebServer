@@ -1,0 +1,239 @@
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+	<link rel="stylesheet" href="styles.css?v=dqd"><!-- add 'v=' to make sure it reload -->
+    <script src="/scripts/jquery-3.5.1.min.js"></script>	
+    <script>
+        $(document).ready(function(){
+			<!-- this defocus button so to get a clicked visual for mobile -->
+			document.addEventListener('click', function(e){ 
+				//console.log('got click');
+				if(document.activeElement.toString() == '[object HTMLButtonElement]'){
+					setTimeout(function(){
+						// wait then defocus button
+						document.activeElement.blur();
+					},500);
+				} else {
+					// when user click on anything but button
+					//console.log('cannot find button' + document.activeElement);// debug
+				} 
+			});
+            $("#centralheating_advance_button").click(function(){
+                send_switch_request('toggle');
+            });
+            $("#centralheating_plus1hour_button").click(function(){
+                send_switch_request('1hour');
+            });         
+            $("#centralheating_refresh_button").click(function(){
+                send_switch_request('refresh');
+            });
+            $('#edit_schedule_button').click(function(e){
+				e.preventDefault();
+				window.location='/schedule';
+			});
+			$('#test_button').click(function(e){ // Test button, for dev only
+				$.post("schedule.json", { action: 'summary' })
+                 .done(function(data){
+					//
+					//console.log(data);
+					//
+					var tbl_body = "";
+					var odd_even = false;
+					$.each(data, function() {
+						$.each(this, function(k, row) {
+							var tbl_row = "";
+							$.each(this, function(k, col){
+								tbl_row += "<td>xx"+col+"</td>";
+							});
+							tbl_body += "<tr class=\""+( odd_even ? "odd" : "even")+"\">"+tbl_row+"</tr>";
+							odd_even = !odd_even;
+						});
+					});
+					$("#test_table_id").html(tbl_body);
+				 },"json")
+				 .fail(function(xhr, status, error) {
+                     alert("failed " + xhr + ", status: " + status + ", error" + error); 
+                 });
+			});
+			
+			$('#add_to_home').click(function(e){
+				e.preventDefault();
+				addToHomescreen();
+			});
+			function update_schedule_summary(){
+				$.post("schedule.json", { action: 'summary' })
+                 .done(function(data){
+					// console.log(data); //debug
+					var MAX_COUNT = 5; //do not want more than 5 or else it wont fit
+					var count = 0;//
+					var tbl_body = "";
+					var odd_even = false;
+					$.each(data, function() {
+						var tbl_row = "";
+						$.each(this, function(k, row) {
+							if (count < MAX_COUNT){
+								var the_class = (row.isOn) ? "schedule_summary_on" : "schedule_summary_off";
+								var the_hour = ('0' + row.hour).slice(-2);
+								var the_minute = ('0' + row.minute).slice(-2);
+								tbl_row += "<td id='" + the_class +"'>" + the_hour + ":" + the_minute + "</td>";
+								count++;
+							}
+						});
+						tbl_body += "<tr>"+tbl_row+"</tr>";
+					});
+					$("#schedule_summary_table").html(tbl_body);
+				 }, "json")
+				 .fail(function(xhr, status, error) {
+                     alert("failed " + xhr + ", status: " + status + ", error" + error); 
+                 });
+			}
+			function send_switch_request(action_name){
+                $.post("centralheating.json", { action: action_name })
+                 .done(function(data){
+					update_status(); //trigger update status 
+                 },"json")
+                 .fail(function(xhr, status, error) {
+                     alert("failed " + xhr + ", status: " + status + ", error" + error); 
+                 });
+			}
+            function update_status(){
+				$.post("status.json", function(data){
+                    //console.log(data); //debug
+                    $('#last_update_time').text(data.time);
+                    //
+                    var status_msg = '';
+                    if (data.centralheating_state == 'ON'){
+						$("#centralheating_status").css('background-color','chartreuse');
+						status_msg = 'On 运行'
+					} else if (data.centralheating_state == 'OFF'){
+						$("#centralheating_status").css('background-color','red');
+						status_msg = 'Off 关闭'
+					} else {
+						$("#centralheating_status").css('background-color','yellow');
+						if (data.centralheating_state == 'PENDING_ON'){
+							status_msg = 'Switching on 准备运行'
+						} else if (data.centralheating_state == 'PENDING_OFF'){
+							status_msg = 'Switching off 准备关闭'
+						} else {
+							status_msg = 'Error 错误'
+						}
+					}
+					var detail_status_msg = status_msg + '<br>';
+					if (data.centralheating_overridetime != ''){
+						detail_status_msg += 'Override until 覆写直到 ' + '<br>';
+						detail_status_msg += data.centralheating_overridetime;
+					} else {
+						detail_status_msg += '&nbsp;<br>&nbsp;';
+					}
+					detail_status_msg += '<br>&nbsp;<br>&nbsp;';
+					$("#centralheating_status_text").html(detail_status_msg);
+                });
+			}
+			function update_temperature(){
+				$.post("temperature.json", function(data){
+					//console.log(data); //debug
+					$('#external_temperature').html(data.external_temperature + "&#176;C");
+					$('#internal_temperature').html(data.internal_temperature + "&#176;C");
+					$('#target_temperature').html(data.target_temperature + "&#176;C");
+				});
+			}
+            //-- repeating polling function
+            function overall_status_polling(){
+                update_status();
+                setTimeout(overall_status_polling, 5000);
+            }
+            overall_status_polling(); //initial call to start timer
+            function temperature_polling(){
+				update_temperature();
+				setTimeout(temperature_polling, 30000);
+			}
+			temperature_polling(); //initial call to start timer
+			//--
+			update_schedule_summary(); //update schedule summary
+        }); // document ready
+        
+    </script>
+    
+    <!-- html for webapp phone -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- https://www.favicon-generator.org/ -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+	<!-- -->
+</head>
+
+<body>
+<table width='90%' align='center'>
+	
+    <tr><td>
+    <table width='100%'>
+        <tr>
+			<td id="centralheating_status"> </td>
+			<td id="centralheating_status_text"></td>
+		</tr>
+    </table>
+    </td></tr>
+
+    <tr><td>
+    <table width=100%>
+		<tr><td id='last_update_time'>Unable to connect</td></tr>
+		<tr><td id='external_temperature'></td></tr>
+    </table>
+    </td></tr>
+    
+    <tr><td>&nbsp;</td></tr><!-- blank line -->
+
+    <tr><td>
+    <table width='100%'>
+        <tr><td><button id="centralheating_advance_button">Advance<br>前进</button></td></tr>
+    </table>
+    </td></tr>
+    <tr><td>
+    <table width='100%'>
+        <tr>
+		    <td><button id="centralheating_plushalfhour_button">Plus &#189;	 hour<br>加半小时</button></td>
+		    <td><button id="centralheating_plus1hour_button">Plus 1 hour<br>加一小时</button></td>
+		</tr>
+    </table>
+    </td></tr>
+    <tr><td>
+    <table width='100%'>
+        <tr><td><button id="centralheating_refresh_button">Refresh<br>刷新</button></td></tr>
+    </table>
+    </td><tr>
+
+    <tr><td>&nbsp;</td></tr><!-- blank line -->
+
+    <tr><td>
+    <table width='100%'>
+        <tr><td>
+		<button id="edit_schedule_button">Edit Schedule<br>更改时间表</button>
+        </td></tr>
+    </table>
+    </td></tr>
+	
+	<table id='schedule_summary_table' align='center'>
+	</table>
+	
+</table>
+</body>
+
+</html>
+

@@ -1,0 +1,150 @@
+
+body {
+	background-color: #1f2833;
+}
+
+.button,
+button {
+	width: 100%;
+	display: block;
+	background-color:#2f3843;
+	#background-color: #1f2833;
+	border: 2px solid black;
+	border-color: #99ff99;
+	color: #99ff99;
+	font-family: verdana;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	font-size: 16px;
+	border-radius: 8px;
+}
+
+.button:focus,
+button:focus{
+	background-color:#006666;
+	outline: none;
+}
+
+#temperature_up_button,
+#temperature_down_button{
+	font-size: 20px;
+}
+
+#centralheating_status {
+	width: 10%;
+	padding: 15px 15px;
+	#border-radius: 8px;
+}
+
+#centralheating_status_text {
+	width: 90%;
+	border: 2px solid black;
+	border-color: #99ff99;
+	color: #99ff99;
+	font-family: Courier, monospace;
+	padding: 15px 15px;
+	text-align: left;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	#border-radius: 8px;
+}
+
+#row_separator {
+	display: block;
+	padding: 15px 15px;
+}
+
+#schedule_summary_on {
+	color: #009933;
+	#background-color: #cc0000;
+	font-family: verdana;
+	padding: 15px 15px 15px 15px;
+}
+
+#schedule_summary_off {
+	color: #cc0000;
+	#background-color: #cc0000;
+	font-family: verdana;
+	padding: 15px 15px 15px 15px;
+}
+
+#temperature_header {
+	height: 16px;
+	text-align: center;
+	font-family: verdana;
+	color: #99ff99;
+	font-size: 16px;
+}
+
+#last_update_time {
+	color: #99ff99;
+	text-align: right;
+	font-family: Courier, monospace;
+	font-size: 10px;		
+}
+
+#external_temperature,
+#internal_temperature,
+#internal_humidity,
+#target_temperature{
+	color: #99ff99;
+	text-align: right;
+	font-family: Courier, monospace;
+	font-size: 12px;		
+}
+
+#temperature_value {
+	text-align: center;
+	color: #ff9933;
+	font-family: Impact, Charcoal, sans-serif;
+	font-size: 50px;
+}
+
+#temperature_spacer {
+	display: inline-block;
+}
+
+
+/* schedule page style */
+
+#week_header,
+#weekday_schedule,
+#weekend_schedule {
+	color: #99ff99;
+	font-family: verdana;
+	padding: 15px 15px 15px 15px;
+}
+
+.modal { /* NOTE: modal is the pop up window */
+  display: none;
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  -webkit-animation-name: fadeIn; /* Fade in the background */
+  -webkit-animation-duration: 0.4s;
+  animation-name: fadeIn;
+  animation-duration: 0.4s
+}
+
+.modal-content {
+  align: center;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  background-color: #2f3843;
+  color: #99ff99;
+  font-family: verdana;
+  width: 100%;
+  -webkit-animation-name: slideIn;
+  -webkit-animation-duration: 0.4s;
+  animation-name: slideIn;
+  animation-duration: 0.4s
+}

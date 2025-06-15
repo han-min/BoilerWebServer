@@ -1,0 +1,129 @@
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+	<link rel="stylesheet" href="/styles.css?v=d2z911q"><!-- add 'v=' to make sure it reload -->
+    <script src="/scripts/jquery-3.5.1.min.js"></script>
+    <script>
+		function getcheckbox(daytype){
+			var raw = $(':checkbox[name=' + daytype + ']').map(function() {
+				//console.log(this);
+				var op = {};
+				// these has to match given by function 'schedule_to_form'
+				op['hour'] = parseInt(this.attributes.hour.value, 10);
+				op['minute'] = parseInt(this.attributes.minute.value, 10);
+				op['dayType'] = daytype;
+				//op['minute'] = this.attr('minute');
+				op['isOn'] = this.checked;
+				return op;
+			});
+			var r = [];
+			for (var i=0; i<raw.length; i++){
+				r[i] = raw[i];
+			}
+			//console.log(r);
+			return r;
+		}
+		function processform(){
+			//var the_form = document.getElementsByName('schedule_form');
+			//console.log(the_form)*;
+			//
+			var weekday = getcheckbox('WEEKDAY');
+			var weekend = getcheckbox('WEEKEND');
+			var map = {};
+			map['WEEKDAY']=weekday;
+			map['WEEKEND']=weekend;
+			var schedule = {};
+			schedule['schedule']=map;
+			schedule['schedule']=map;
+			//console.log(schedule);
+			var json_string = JSON.stringify(schedule);
+			console.log(json_string);
+			//
+			$.post("/schedule.json", {action:'submit', form: json_string})
+				.done(function(data){
+					//alert("Schedule saved");
+					var pop_up_saved = document.getElementById("pop_up_saved");
+					pop_up_saved.style.display = "block";
+					setTimeout(function(){
+						pop_up_saved.style.display = 'none'; //hide pop-up
+						//TODO location.href='/';
+					},1000);
+				})
+				.fail(function(xhr, status, error){
+					console.log(error)
+				});
+		}
+		function padnumber(numstring){
+			numstring = numstring.toString();
+			if (numstring.length < 2){
+				numstring = "0" + numstring;
+			}
+			return numstring;
+		}
+		function schedule_to_form(list_of_scheduleitem, daytype){
+			var html="";
+			for (var i=0;i<list_of_scheduleitem.length; i++) {
+				var item = list_of_scheduleitem[i];
+				//console.log(item);
+				html = html 
+					+ "<tr><td><input type='checkbox' "
+					+ ' hour=' + item.hour
+					+ ' minute=' + item.minute
+					+ ' name=' + daytype;
+				if (item.isOn == true){
+					html = html + ' checked ';
+				}
+				html = html
+					+ '></td><td>' 
+					+ padnumber(item.hour)
+					+ ':' + padnumber(item.minute)
+					+ '</td></tr>'
+				//
+			}
+			return html;
+		}
+		$(document).ready(function(){
+			var pop_up_saved = document.getElementById("pop_up_saved");
+			pop_up_saved.style.display = 'none'; //hide pop-up
+			$.post("/schedule.json", { action: "request" })
+				.done(function(data){
+					//console.log(data);
+					var weekday_html=schedule_to_form(data.schedule.WEEKDAY, 'WEEKDAY');
+					$("#weekday_schedule").html(weekday_html);
+					var weekday_html=schedule_to_form(data.schedule.WEEKEND, 'WEEKEND');
+					$("#weekend_schedule").html(weekday_html);
+				})
+				.fail(function(xhr, status, error){
+					console.log(error)
+				});
+		});
+		
+	</script>
+	
+	</head>
+	
+	<!-- the pop up window -->
+	<div id="pop_up_saved" class="modal">
+		<div class="modal-content">
+			<p>Schedule Saved 时间表已储存</p>
+		</div>
+	</div>
+	
+	<body>
+	<form name='schedule_form'>
+	<table id='schedule' align='center'>
+		<tr id='week_header'><td align='center'>Weekdays<br>周一到周五</td><td align='center'>Weekends<br>周六周日</td></tr>
+		<tr><td align='center'>
+		<table id='weekday_schedule'></table>
+		</td><td align='center'>
+		<table id='weekend_schedule'></table>
+		</td></tr>
+		<tr>
+			<td><input class='button' type='button' onclick='processform()' value='Save 储存'></td>
+			<td><input class='button' type='button' onclick="location.href='/';" value='Back 回退'/></td>
+		</tr>
+	</table>
+	</form>
+	</body>
+	
+</html>
