@@ -1,7 +1,8 @@
 package com.mint.boilerws.scheduler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import com.mint.boilerws.scheduler.ScheduleItem.DayType;
+import com.mint.boilerws.util.FileUtil;
+import org.junit.Test;
 
 import java.io.File;
 import java.time.LocalTime;
@@ -11,10 +12,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.junit.Test;
-
-import com.mint.boilerws.scheduler.ScheduleItem.DayType;
-import com.mint.boilerws.util.FileUtil;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TestSchedule {
 

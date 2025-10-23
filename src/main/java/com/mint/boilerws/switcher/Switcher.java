@@ -119,7 +119,7 @@ public abstract class Switcher {
             return;
         }
         // reschedule itself
-        final long delay = this.config.get("switch.repeatstate.delay", 120 * 10_000);
+        final long delay = this.config.get("switch.repeatstate.delay", 10_000);
         if (scheduledRepeatState != null && !scheduledRepeatState.isDone()) {
             // cancel if there's any to avoid multiple, but this
             // thread can be the very one, so 'false' not to interrupt it

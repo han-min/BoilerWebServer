@@ -46,7 +46,9 @@ public class BbcParser {
     
     private long lastUpdateTime = 0;
     private double latestValue = Double.NaN;
-    
+
+    private long timeout = 5;
+
     public BbcParser(final Config config) {
         super();
         final String baseHtml = config.get("bbc.parser.base.html", BASE_HTML);
@@ -56,7 +58,7 @@ public class BbcParser {
         LOG.info("Using html: " + rssHtml);
     }
 
-    public synchronized double getLatestTemperature() {
+    public synchronized double  getLatestTemperature() {
         final long now = System.currentTimeMillis();
         if (Double.isNaN(latestValue) || (now - lastUpdateTime) > staleThreshold) {
             final double temp = getTemperature();
@@ -104,10 +106,14 @@ public class BbcParser {
         final ContentResponse res = client.newRequest(this.rssHtml)
                 .version(HttpVersion.HTTP_1_1)
                 .method(HttpMethod.GET)
-                .timeout(5, TimeUnit.SECONDS)
+                .timeout(this.timeout, TimeUnit.SECONDS)
                 .send();
         client.stop();
         return res;
+    }
+
+    public void setTimeout(long timeOutSeconds){
+        this.timeout = timeOutSeconds;
     }
 
     private double getTemperature() {

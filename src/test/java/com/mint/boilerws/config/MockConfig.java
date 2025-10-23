@@ -1,4 +1,11 @@
 package com.mint.boilerws.config;
 
-public class MockConfig {
+import java.io.File;
+
+public class MockConfig extends Config {
+
+    public MockConfig() {
+        super(null);
+    }
+
 }

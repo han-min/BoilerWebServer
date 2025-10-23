@@ -16,11 +16,15 @@ public class Config {
     
     public Config(final File configFile) {
         this.properties = new Properties();
-        LOG.info("Using config file: " + configFile.getAbsolutePath() + ", exists: " + configFile.exists());
-        try (final InputStream in = new FileInputStream(configFile);) {
-            properties.load(in);
-        } catch (IOException e) {
-            LOG.error("Error loading properties file", e);
+        if (configFile == null) {
+            LOG.info("Null config file.");
+        } else {
+            LOG.info("Using config file: " + configFile.getAbsolutePath() + ", exists: " + configFile.exists());
+            try (final InputStream in = new FileInputStream(configFile);) {
+                properties.load(in);
+            } catch (IOException e) {
+                LOG.error("Error loading properties file", e);
+            }
         }
     }
     
